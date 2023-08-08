@@ -26,7 +26,7 @@ project
 以下會以`PRIVATE`、`INTERFACE`以及`PUBLIC`的順序來解釋
 
 ## Private 
-```
+```cmake
 // project/CMakeLists.txt
 
 cmake_minimum_required( VERSION 3.1 )
@@ -38,7 +38,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC moduleA)
 
 ```
 
-```
+```cmake
 // project/module_a/CMakeLists.txt
 
 cmake_minimum_required( VERSION 3.1 )
@@ -52,7 +52,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ModuleB)
 
 ```
 
-```
+```cmake
 // project/module_a/module_b/CMakeLists.txt
 
 cmake_minimum_required( VERSION 3.1 )
