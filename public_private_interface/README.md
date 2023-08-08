@@ -99,7 +99,6 @@ void Print_B()
 void Print_A();
 ```
 
-
 ```cpp
 // func_a.cpp
 #include "func_a.h"
@@ -145,7 +144,6 @@ print from func_b
 void Print_B();
 ```
 
-
 ```cpp
 // func_b.cpp
 #include "func_b.h"
@@ -186,7 +184,7 @@ int main()
 {
     std::cout << "Hello, world" << std::endl;
     Print_A();
-    Print_B();
+    Print_B(); // can see and call API of ModuleB through ModuleA
     return 0;
 }
 ```
@@ -198,3 +196,78 @@ Hello, world
 print from func_a
 print from func_b
 ```
+
+
+## Public
+
+被 `target_link_libraries` 為 `PUBLIC` 的 `ModuleB` 可以在target( `ModuleA` )內使用，在當其他地方引入 `ModuleA` 時也能看到 `ModuleB` 的存在
+
+```
+PUBLIC = PRIVATE + INTERFACE
+```
+
+### C++ code explaination 
+
+#### module_b
+```cpp
+// func_b.h
+#include <iostream>
+void Print_B();
+```
+
+```cpp
+// func_b.cpp
+#include "func_b.h"
+void Print_B()
+{
+    std::cout << "print from func_b" << std::endl;
+}
+```
+
+#### module_a
+把 `ModuleB` 設為 `PUBLIC` 代表 `ModuleB` 的API既可以在 `ModuleA` 的實作(.cpp)時引入，也可以在定義(.h)內引入後，再由其他地方引入 `ModuleA` 的標頭檔來利用`ModuleB` 的API
+
+```cpp
+// func_a.h
+#include <iostream>
+#include "func_b.h" // include func_b.h here for implementation and call from other places
+void Print_A();
+```
+
+```cpp
+// func_a.cpp
+#include <iostream>
+#include "func_a.h"
+
+void Print_A()
+{
+    std::cout << "print from func_a" << std::endl;
+    Print_B();
+}
+```
+
+#### project
+
+```cpp
+// main.cpp
+#include "func_a"
+int main()
+{
+    std::cout << "Hello, world" << std::endl;
+    Print_A(); // also call Print_B() by Print_A()
+    Print_B(); // can see and call API of ModuleB through ModuleA
+    return 0;
+}
+```
+
+#### result
+
+```console
+Hello, world
+print from func_a
+print from func_b
+print from func_b
+```
+
+## Conclusion
+
