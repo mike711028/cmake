@@ -168,11 +168,12 @@ void Print_A();
 
 ```cpp
 // func_a.cpp
-#include "func_a.h"
+#include <iostream>
+// can not include func_a.h because will include func_b.h too
+// and func_b.h should not show in the implementation due to INTERFACE
 void Print_A()
 {
     std::cout << "print from func_a" << std::endl;
-
 }
 ```
 
@@ -193,7 +194,7 @@ int main()
 #### result
 
 ```console
-> Hello, world
-> print from func_a
-> print from func_b
+Hello, world
+print from func_a
+print from func_b
 ```
