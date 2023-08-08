@@ -69,7 +69,7 @@ target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inclu
 
 ## Private 
 
-在被link為 `PRIVATE` 的 `ModuleB` 只能被所要生成的target( `ModuleA` )使用，在其他任何地方引入 `ModuleA` 都不會看到 `ModuleB` 的存在
+在被 `target_link_libraries` 為 `PRIVATE` 的 `ModuleB` 只能被所要生成的target( `ModuleA` )使用，在其他任何地方引入 `ModuleA` 都不會看到 `ModuleB` 的存在
 
 ```cmake
 // project/module_a/CMakeLists.txt
@@ -81,23 +81,22 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/module_b)
 
 add_library(${PROJECT_NAME} STATIC ${CMAKE_CURRENT_SOURCE_DIR}/src/func_a.cpp)
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-
-#target_link_libraries(${PROJECT_NAME} PRIVATE ModuleB)
+target_link_libraries(${PROJECT_NAME} PRIVATE ModuleB)
 ```
 
 ### C++ code explaination 
 
 #### module_b
 ```cpp
-// fun_b.h
+// func_b.h
 #include <iostream>
 void Print_B();
 ```
 
 
 ```cpp
-// fun_b.cpp
-#include "fun_b.h"
+// func_b.cpp
+#include "func_b.h"
 void Print_B()
 {
     std::cout << "print from func_b" << std::endl;
@@ -105,21 +104,24 @@ void Print_B()
 ```
 
 #### module_a
+把 `ModuleB` 設為 `PRIVATE` 代表只限訂於 `ModuleA` 內使用，所以 `ModuleB` 的API**只能**在 `ModuleA` 的實作(.cpp)時引入，如果在定義(.h)
+內引入後，當其他地方引入 `ModuleA` 的標頭檔時就會發生報錯
+
 ```cpp
-// fun_a.h
+// func_a.h
 #include <iostream>
 void Print_A();
 ```
 
 
 ```cpp
-// fun_a.cpp
+// func_a.cpp
 #include "func_a.h"
-#include "func_b.h"
+#include "func_b.h" // include func_b.h in PRIVATE
 void Print_A()
 {
     std::cout << "print from func_a" << std::endl;
-    Print_B();
+    Print_B(); // use function of ModuleB only in implementation 
 }
 ```
 
@@ -134,4 +136,12 @@ int main()
     Print_A();
     return 0;
 }
+```
+
+#### result
+
+```console
+Hello, world
+print from func_a
+print from func_b
 ```
