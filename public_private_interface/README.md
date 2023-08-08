@@ -271,3 +271,12 @@ print from func_b
 
 ## Conclusion
 
+* `PRIVATE`: `ModuleB` 只連結到 `ModuleA` ，如果 `Project` 連結了 `ModuleA`，`Project` 不連結也看不見 `ModuleB`
+
+
+* `INTERFACE`: `ModuleB` 不會連結到 `ModuleA` ，一旦 `Project` 連結了 `ModuleA`，`Project` 就會連結也看得見 `ModuleB`
+
+* `PUBLIC`: `ModuleB` 會連結到 `ModuleA` ， `Project` 連結了 `ModuleA`，`Project` 也會跟著連結 `ModuleB
+
+* `target_include_directories` : 負責控制標頭檔的傳遞
+* `target_link_libraries` : 負責控制連結庫和標頭檔的傳遞
