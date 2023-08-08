@@ -69,20 +69,7 @@ target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inclu
 
 ## Private 
 
-在被 `target_link_libraries` 為 `PRIVATE` 的 `ModuleB` 只能被所要生成的target( `ModuleA` )使用，在其他任何地方引入 `ModuleA` 都不會看到 `ModuleB` 的存在
-
-```cmake
-// project/module_a/CMakeLists.txt
-
-cmake_minimum_required( VERSION 3.1 )
-project( ModuleA )
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/module_b)
-
-add_library(${PROJECT_NAME} STATIC ${CMAKE_CURRENT_SOURCE_DIR}/src/func_a.cpp)
-target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-target_link_libraries(${PROJECT_NAME} PRIVATE ModuleB)
-```
+被 `target_link_libraries` 為 `PRIVATE` 的 `ModuleB` 只能被所要生成的target( `ModuleA` )使用，在其他任何地方引入 `ModuleA` 都不會看到 `ModuleB` 的存在
 
 ### C++ code explaination 
 
@@ -92,7 +79,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ModuleB)
 #include <iostream>
 void Print_B();
 ```
-
 
 ```cpp
 // func_b.cpp
@@ -104,8 +90,8 @@ void Print_B()
 ```
 
 #### module_a
-把 `ModuleB` 設為 `PRIVATE` 代表只限訂於 `ModuleA` 內使用，所以 `ModuleB` 的API**只能**在 `ModuleA` 的實作(.cpp)時引入，如果在定義(.h)
-內引入後，當其他地方引入 `ModuleA` 的標頭檔時就會發生報錯
+把 `ModuleB` 設為 `PRIVATE` 代表只限定於 `ModuleA` 內使用，所以 `ModuleB` 的API**只能**在 `ModuleA` 的實作(.cpp)時引入，如果在定義(.h)
+內引入後，當其他地方再引入 `ModuleA` 的標頭檔時就會發生報錯(cmake可以過，但make報錯)
 
 ```cpp
 // func_a.h
@@ -144,4 +130,70 @@ int main()
 Hello, world
 print from func_a
 print from func_b
+```
+
+## Interface
+
+被 `target_link_libraries` 為 `INTERFACE` 的 `ModuleB` **不能**在target( `ModuleA` )內使用，只有當其他地方引入 `ModuleA` 時才會看到 `ModuleB` 的存在
+
+### C++ code explaination 
+
+#### module_b
+```cpp
+// func_b.h
+#include <iostream>
+void Print_B();
+```
+
+
+```cpp
+// func_b.cpp
+#include "func_b.h"
+void Print_B()
+{
+    std::cout << "print from func_b" << std::endl;
+}
+```
+
+#### module_a
+把 `ModuleB` 設為 `INTERFACE` 代表只是將 `ModuleA` 當作介面，所以 `ModuleB` 的API不能在 `ModuleA` 的實作(.cpp)時引入，**只能**在定義(.h)
+內引入後，再由其他地方引入 `ModuleA` 的標頭檔來利用`ModuleB` 的API
+
+```cpp
+// func_a.h
+#include <iostream>
+#include "func_b.h" // use func_a.h as the interface for other target
+void Print_A();
+```
+
+```cpp
+// func_a.cpp
+#include "func_a.h"
+void Print_A()
+{
+    std::cout << "print from func_a" << std::endl;
+
+}
+```
+
+#### project
+
+```cpp
+// main.cpp
+#include "func_a"
+int main()
+{
+    std::cout << "Hello, world" << std::endl;
+    Print_A();
+    Print_B();
+    return 0;
+}
+```
+
+#### result
+
+```console
+> Hello, world
+> print from func_a
+> print from func_b
 ```
